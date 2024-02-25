@@ -1,4 +1,4 @@
-/* Video pause: 1:28:41 */
+/* Video pause: 1:48:18 */
 import Header from '@/components/Header';
 import ListItem from '@/components/ListItem';
 
