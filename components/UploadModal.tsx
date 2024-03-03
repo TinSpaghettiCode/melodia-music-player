@@ -35,6 +35,17 @@ const UploadModal = () => {
     }
   };
 
+  const removeVietnameseTones = (str: string) => {
+    str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, 'a');
+    str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, 'e');
+    str = str.replace(/ì|í|ị|ỉ|ĩ/g, 'i');
+    str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, 'o');
+    str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, 'u');
+    str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, 'y');
+    str = str.replace(/đ/g, 'd');
+    return str;
+  };
+
   const onSubmit: SubmitHandler<FieldValues> = async (values) => {
     /* Upload to supabase */
     try {
@@ -43,21 +54,20 @@ const UploadModal = () => {
       const imageFile = values.image?.[0];
       const songFile = values.song?.[0];
 
-      console.log(imageFile, 'ảnh');
-      console.log(songFile, 'bài hát');
-      console.log(user, 'người dùng');
-
       if (!imageFile || !songFile || !user) {
         toast.error('Missing fields');
         return;
       }
 
       const uniqueId = uniqid();
+      const songTitle = removeVietnameseTones(values.title);
+      const uniqueSongTitle = `song-${songTitle}-${uniqueId}`;
+      const uniqueImageTitle = `image-${songTitle}-${uniqueId}`;
 
       /* Upload song */
       const { data: songData, error: songError } = await supabaseClient.storage
         .from('songs')
-        .upload(`song-${values.title}-${uniqueId}`, songFile, {
+        .upload(uniqueSongTitle, songFile, {
           cacheControl: '3600',
           upsert: false,
         });
@@ -73,7 +83,7 @@ const UploadModal = () => {
       const { data: imageData, error: imageError } =
         await supabaseClient.storage
           .from('images')
-          .upload(`image-${values.title}-${uniqueId}`, imageFile, {
+          .upload(uniqueImageTitle, imageFile, {
             cacheControl: '3600',
             upsert: false,
           });
